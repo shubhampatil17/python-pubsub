@@ -33,6 +33,7 @@ UUID = uuid.uuid4().hex
 PROJECT_ID = os.environ["GOOGLE_CLOUD_PROJECT"]
 TOPIC_ID = "publisher-test-topic-" + UUID
 SUBSCRIPTION_ID = "publisher-test-subscription-" + UUID
+TEST_MESSAGES_FILE_PATH = "resources/publish-test-sample-messages.txt"
 # Allow 60s for tests to finish.
 MAX_TIME = 60
 
@@ -365,6 +366,12 @@ def test_publish(topic_path: str, capsys: CaptureFixture[str]) -> None:
 
     out, _ = capsys.readouterr()
     assert f"Published messages to {topic_path}." in out
+
+def test_publish_from_file(topic_path: str, capsys: CaptureFixture[str]) -> None:
+    publisher.publish_messages_from_file(PROJECT_ID, TOPIC_ID, TEST_MESSAGES_FILE_PATH)
+
+    out, _ = capsys.readouterr()
+    assert f"Published messages from {TEST_MESSAGES_FILE_PATH} to {topic_path}." in out
 
 
 def test_publish_with_custom_attributes(

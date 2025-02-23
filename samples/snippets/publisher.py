@@ -497,6 +497,30 @@ def publish_messages(project_id: str, topic_id: str) -> None:
     # [END pubsub_quickstart_publisher]
     # [END pubsub_publish]
 
+def publish_messages_from_file(project_id: str, topic_id: str, file_path: str) -> None:
+    """Publishes messages to a Pub/Sub topic from a file."""
+    # [START pubsub_publish_from_file]
+    from google.cloud import pubsub_v1
+
+    # project_id = "your-project-id"
+    # topic_id = "your-topic-id"
+    # file_path = "path/to/file"
+
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project_id, topic_id)
+
+    print(file_path)
+    with open(file_path, "r") as f:
+        for line in f:
+            # Data must be a bytestring, remove newline characters.
+            data = line.strip('\n').encode("utf-8")
+            # When you publish a message, the client returns a future.
+            future = publisher.publish(topic_path, data)
+            print(future.result())
+
+    print(f"Published messages from {file_path} to {topic_path}.")
+    # [END pubsub_publish_from_file]
+
 
 def publish_messages_with_custom_attributes(project_id: str, topic_id: str) -> None:
     """Publishes multiple messages with custom attributes
@@ -903,6 +927,13 @@ if __name__ == "__main__":
     publish_parser = subparsers.add_parser("publish", help=publish_messages.__doc__)
     publish_parser.add_argument("topic_id")
 
+    publish_from_file_parser = subparsers.add_parser(
+        "publish-from-file",
+        help=publish_messages_from_file.__doc__
+    )
+    publish_from_file_parser.add_argument("topic_id")
+    publish_from_file_parser.add_argument("file_path")
+
     publish_with_custom_attributes_parser = subparsers.add_parser(
         "publish-with-custom-attributes",
         help=publish_messages_with_custom_attributes.__doc__,
@@ -1020,6 +1051,8 @@ if __name__ == "__main__":
         delete_topic(args.project_id, args.topic_id)
     elif args.command == "publish":
         publish_messages(args.project_id, args.topic_id)
+    elif args.command == "publish-from-file":
+        publish_messages_from_file(args.project_id, args.topic_id, args.file_path)
     elif args.command == "publish-with-custom-attributes":
         publish_messages_with_custom_attributes(args.project_id, args.topic_id)
     elif args.command == "publish-with-error-handler":
